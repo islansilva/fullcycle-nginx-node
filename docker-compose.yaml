@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.nginx.prod
+    image: islansilva/nginx:prod
+    container_name: nginx_node
+    ports:
+      - 8080:80
+    networks:
+      - projectnode
+    depends_on:
+      nodejs:
+        condition: service_healthy
+    
+
+  nodejs:
+    build:
+      context: ./node
+      dockerfile: Dockerfile.node.prod
+    image: islansilva/node:prod
+    container_name: service_node
+    volumes:
+      - ./node/code_node/index.js:/usr/src/app/index.js 
+    ports:
+      - 3000:3000
+    networks:
+      - projectnode
+    command: ["node", "index.js"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://service_node:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./init_sql:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=node
+    ports:
+      - 3306:3306
+    networks:
+      - projectnode
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
+    
+
+networks:
+  projectnode:
+    name: projectnode
+    driver: bridge

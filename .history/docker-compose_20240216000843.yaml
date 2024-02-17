@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: Dockerfile.nginx.prod
+    image: islansilva/nginx:prod
+    container_name: ngbinx_node
+    ports:
+      - 8080:80
+    networks:
+      - projectnode
+    depends_on:
+      node:
+        condition: service_healthy
+
+
+  node:
+    build:
+      context: ./
+      dockerfile: Dockerfile.node.prod
+    image: islansilva/node:prod
+    container_name: service_node
+    ports:
+      - 3000:3000
+    networks:
+      - projectnode
+    volumes:
+      - ./code_node:/usr/src/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=node
+    ports:
+      - 3306:3306
+    networks:
+      - projectnode
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 2s
+      timeout: 10s
+      retries: 3
+    
+
+networks:
+  projectnode:
+    driver: bridge
