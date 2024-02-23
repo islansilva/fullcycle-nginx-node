@@ -23,7 +23,7 @@ services:
     image: islansilva/node:prod
     container_name: service_node
     volumes:
-      - ./node/code_node:/usr/src/app
+      - ./node/code_node:/usr/src/app/index.js 
     ports:
       - 3000:3000
     networks:
