@@ -22,8 +22,6 @@ services:
       dockerfile: Dockerfile.node.prod
     image: islansilva/node:prod
     container_name: service_node
-    volumes:
-      - ./node/code_node:/usr/src/app
     ports:
       - 3000:3000
     networks:
