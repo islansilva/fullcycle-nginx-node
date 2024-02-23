@@ -26,6 +26,8 @@ services:
       - 3000:3000
     networks:
       - projectnode
+    volumes:
+      - /node/code_node:/usr/src/app
     command: ["node", "index.js"]
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://service_node:3000/health || exit 1"]
@@ -63,3 +65,4 @@ networks:
   projectnode:
     name: projectnode
     driver: bridge
+
