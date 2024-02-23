@@ -2,9 +2,8 @@ from node:18
 
 WORKDIR /usr/src/app
 
-RUN npm init -y && \
-    npm install express --save -y && \
-    npm install mysql --save -y
+COPY code_node/package*.json .
 
+RUN npm install
 
-EXPOSE 3000
+CMD [ "node", "index.js" ]

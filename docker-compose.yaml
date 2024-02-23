@@ -27,8 +27,9 @@ services:
     networks:
       - projectnode
     volumes:
-      - /node/code_node:/usr/src/app
-    command: ["node", "index.js"]
+      - ./node/code_node:/usr/src/app
+      - /usr/src/app/node_modules
+    command: node index.js
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://service_node:3000/health || exit 1"]
       interval: 30s
